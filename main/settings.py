@@ -26,8 +26,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'djoser',
     'drf_yasg',
-
+    # my apps
+    'users_app',
+    'profiles_app',
 ]
 
 MIDDLEWARE = [
@@ -59,19 +62,39 @@ TEMPLATES = [
 ]
 
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES':[
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ],
+# }
+# SIMPLE_JWT = {
+#     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+#     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+# }
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES':[
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    ),
 }
+
+SIMPLE_JWT = {
+   'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# DJOSER
+DJOSER = {
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'SEND_ACTIVATION_EMAIL': True,
+    'SET_PASSWORD_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'TOKEN_MODEL': None,  # We use only JWT
+    'ACTIVATION_URL': 'auth/verify/{uid}/{token}/',
+}
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=59),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-}
 
 WSGI_APPLICATION = 'main.wsgi.application'
 
@@ -90,6 +113,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+DEFAULT_FROM_EMAIL = 'django-auth@kantegory.me'
 
 
 # Password validation
@@ -122,6 +146,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'users_app.User'
+AUTHENTICATION_BACKENDS = ('users_app.backends.AuthBackend',)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
