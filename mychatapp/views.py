@@ -1,7 +1,7 @@
-from cgi import print_arguments
-from django.shortcuts import render, redirect
+
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import ChatMessage, Profile, Friend
-from .forms import ChatMessageForm
+from .forms import ChatMessageForm, ChatRoomForm
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 import json
@@ -65,3 +65,22 @@ def chatNotification(request):
         chats = ChatMessage.objects.filter(msg_sender__id=friend.profile.id, msg_receiver=user, seen=False)
         arr.append(chats.count())
     return JsonResponse(arr, safe=False)
+
+
+
+def createChatRoom(request):
+    if request.method == 'POST':
+        form = ChatRoomForm(request.POST)
+        if form.is_valid():
+            chat_room = form.save(commit=False)
+            chat_room.user = request.user
+            chat_room.save()
+
+            # Check if profile object already exists for current user
+            profile = get_object_or_404(Profile, user=request.user)
+
+            chat_room.friends.add(profile)
+            return redirect('chat_room_detail', pk=chat_room.pk)
+    else:
+        form = ChatRoomForm()
+    return render(request, 'mychatapp/chat_room.html', {'form': form})

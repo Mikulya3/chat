@@ -1,7 +1,5 @@
-import profile
+from datetime import datetime
 from xmlrpc.client import Boolean
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -12,7 +10,12 @@ class Profile(models.Model):
     name = models.CharField(max_length=100)
     pic = models.ImageField(upload_to="img", blank=True, null=True)
     friends = models.ManyToManyField('Friend', related_name = "my_friends", blank=True)
-    
+    created_at = models.DateTimeField(default=datetime.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return self.name
     
@@ -33,7 +36,3 @@ class ChatMessage(models.Model):
         return self.body
 
 
-@receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
